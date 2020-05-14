@@ -612,6 +612,23 @@ class UserHttpConfig(models.Model, UserPropertyMixin):
         return cls.objects.get(user_id=user_id)
 
 
+class UserSocks5Config(models.Model, UserPropertyMixin):
+    # TODO delete this table
+    MIN_PORT = 1025
+    PORT_BLACK_SET = {6443, 8472}
+
+    user_id = models.IntegerField(unique=True, db_index=True)
+    port = models.IntegerField("端口", unique=True, default=MIN_PORT)
+    password = models.CharField("密码", max_length=32, default=get_short_random_string)
+    enable = models.BooleanField("是否开启", default=True)
+
+    class Meta:
+        verbose_name_plural = "用户Socks5配置"
+
+    @classmethod
+    def get_by_user_id(cls, user_id):
+        return cls.objects.get(user_id=user_id)
+
 class UserTraffic(models.Model, UserPropertyMixin):
     # TODO delete this table
 
@@ -632,8 +649,9 @@ class UserTraffic(models.Model, UserPropertyMixin):
 class NodeOnlineLog(models.Model):
     NODE_TYPE_SS = "ss"
     NODE_TYPE_HTTP = "http"
+    NODE_TYPE_SOCKS5 = "socks5"
     NODE_TYPE_VMESS = "vmess"
-    NODE_CHOICES = ((NODE_TYPE_SS, NODE_TYPE_SS), (NODE_TYPE_HTTP, NODE_TYPE_HTTP), (NODE_TYPE_VMESS, NODE_TYPE_VMESS))
+    NODE_CHOICES = ((NODE_TYPE_SS, NODE_TYPE_SS), (NODE_TYPE_HTTP, NODE_TYPE_HTTP), (NODE_TYPE_SOCKS5, NODE_TYPE_SOCKS5), (NODE_TYPE_VMESS, NODE_TYPE_VMESS))
 
     node_id = models.IntegerField()
     node_type = models.CharField(
@@ -1288,12 +1306,106 @@ class HttpNode(BaseAbstractNode):
         return json.dumps(config, ensure_ascii=False)
 
 
+class Socks5Node(BaseAbstractNode):
+    KB = 1024
+    MEGABIT = KB * 125
+
+    server = models.CharField("服务器地址", max_length=128)
+    port = models.IntegerField("端口", default=1100)
+    speed_limit = models.IntegerField("限速", default=0)
+
+    class Meta:
+        verbose_name_plural = "Socks5节点"
+
+    @classmethod
+    @cache.cached(ttl=60 * 60 * 24)
+    def get_user_socks5_configs_by_node_id(cls, node_id):
+        socks5_node = cls.get_or_none_by_node_id(node_id)
+        configs = {"users": []}
+        if not socks5_node:
+            return configs
+
+        for d in User.objects.filter(level__gte=socks5_node.level).values(
+                "id",
+                "proxy_password",
+                "total_traffic",
+                "upload_traffic",
+                "download_traffic",
+        ):
+            enable = d["total_traffic"] > (d["download_traffic"] + d["upload_traffic"])
+            configs["users"].append(
+                {
+                    "user_id": d["id"],
+                    "password": d["ss_password"],
+                    "enable": enable,
+                    "speed_limit": socks5_node.speed_limit,
+                }
+            )
+        if not socks5_node.enable:
+            for cfg in configs["users"]:
+                cfg["enable"] = False
+        return configs
+
+    @property
+    def node_type(self):
+        return "socks5"
+
+    @property
+    def human_speed_limit(self):
+        if self.speed_limit != 0:
+            return f"{round(self.speed_limit / self.MEGABIT, 1)} Mbps"
+        else:
+            return "不限速"
+
+    @property
+    def api_endpoint(self):
+        params = {"token": settings.TOKEN}
+        return (
+                settings.HOST + f"/api/user_socks5_config/{self.node_id}/?{urlencode(params)}"
+        )
+
+    def get_socks5_link(self, user):
+        code = f"{user.proxy_password}@{self.server}:{self.port}"
+        b64_code = base64.urlsafe_b64encode(code.encode()).decode()
+        socks5_link = "http://{}#{}".format(b64_code, quote(self.name))
+        return socks5_link
+
+    def to_dict_with_extra_info(self, user):
+        data = model_to_dict(self)
+        data.update(
+            NodeOnlineLog.get_latest_online_log_info(
+                NodeOnlineLog.NODE_TYPE_SOCKS5, self.node_id
+            )
+        )
+        # if self.custom_method:
+        #     data["method"] = user.ss_method
+        data["proxy_password"] = user.proxy_password
+        data["country"] = self.country.lower()
+        data["socks5_link"] = self.get_socks5_link(user)
+        data["api_point"] = self.api_endpoint
+        data["human_speed_limit"] = self.human_speed_limit
+        return data
+
+    def get_clash_link(self, user):
+        method = user.ss_method if self.custom_method else self.method
+        config = {
+            "name": self.name,
+            "type": "ss",
+            "server": self.server,
+            "port": user.port,
+            "cipher": method,
+            "password": user.proxy_password,
+        }
+        return json.dumps(config, ensure_ascii=False)
+
+
 class UserTrafficLog(models.Model, UserPropertyMixin):
     NODE_TYPE_SS = "ss"
     NODE_TYPE_HTTP = "http"
+    NODE_TYPE_SOCKS5 = "socks5"
     NODE_TYPE_VMESS = "vmess"
-    NODE_CHOICES = ((NODE_TYPE_SS, NODE_TYPE_SS), (NODE_TYPE_HTTP, NODE_TYPE_HTTP), (NODE_TYPE_VMESS, NODE_TYPE_VMESS))
-    NODE_MODEL_DICT = {NODE_TYPE_SS: SSNode, NODE_TYPE_HTTP: HttpNode, NODE_TYPE_VMESS: VmessNode}
+    NODE_CHOICES = ((NODE_TYPE_SS, NODE_TYPE_SS), (NODE_TYPE_HTTP, NODE_TYPE_HTTP), (NODE_TYPE_SOCKS5, NODE_TYPE_SOCKS5), (NODE_TYPE_VMESS, NODE_TYPE_VMESS))
+    NODE_MODEL_DICT = {NODE_TYPE_SS: SSNode, NODE_TYPE_HTTP: HttpNode, NODE_TYPE_SOCKS5: Socks5Node, NODE_TYPE_VMESS: VmessNode}
 
     user_id = models.IntegerField()
     node_type = models.CharField(

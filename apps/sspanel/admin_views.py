@@ -15,6 +15,7 @@ from apps.sspanel.forms import (
     GoodsForm,
     SSNodeForm,
     HttpNodeForm,
+    Socks5NodeForm,
     VmessNodeForm,
 )
 from apps.sspanel.models import (
@@ -26,6 +27,7 @@ from apps.sspanel.models import (
     PurchaseHistory,
     SSNode,
     HttpNode,
+    Socks5Node,
     VmessNode,
     NodeOnlineLog,
     Ticket,
@@ -39,7 +41,7 @@ class NodeListView(StaffRequiredMixin, View):
     def get(self, request):
         context = {
             "node_list": list(SSNode.objects.all().order_by("level", "country"))
-            + list(VmessNode.objects.all().order_by("level", "country")) + list(HttpNode.objects.all().order_by("level", "country"))
+            + list(VmessNode.objects.all().order_by("level", "country")) + list(HttpNode.objects.all().order_by("level", "country")) + list(Socks5Node.objects.all().order_by("level", "country"))
         }
         return render(request, "my_admin/node_list.html", context=context)
 
@@ -52,6 +54,8 @@ class NodeView(StaffRequiredMixin, View):
             form = SSNodeForm()
         elif node_type == "http":
             form = HttpNodeForm()
+        elif node_type == "socks5":
+            form = Socks5NodeForm()
         return render(request, "my_admin/node_detail.html", context={"form": form})
 
     def post(self, request, node_type):
@@ -61,6 +65,8 @@ class NodeView(StaffRequiredMixin, View):
             form = SSNodeForm(request.POST)
         elif node_type == "http":
             form = HttpNodeForm(request.POST)
+        elif node_type == "socks5":
+            form = Socks5NodeForm(request.POST)
 
         if form.is_valid():
             form.save()
@@ -83,6 +89,9 @@ class NodeDetailView(StaffRequiredMixin, View):
         elif node_type == "http":
             http_node = HttpNode.objects.get(node_id=node_id)
             form = HttpNodeForm(instance=http_node)
+        elif node_type == "socks5":
+            socks5_node = Socks5Node.objects.get(node_id=node_id)
+            form = Socks5NodeForm(instance=socks5_node)
 
         return render(request, "my_admin/node_detail.html", context={"form": form})
 
@@ -96,6 +105,9 @@ class NodeDetailView(StaffRequiredMixin, View):
         elif node_type == "http":
             node = HttpNode.objects.get(node_id=node_id)
             form = HttpNodeForm(request.POST, instance=node)
+        elif node_type == "socks5":
+            node = Socks5Node.objects.get(node_id=node_id)
+            form = Socks5NodeForm(request.POST, instance=node)
 
         if form.is_valid():
             form.save()
@@ -117,6 +129,9 @@ class NodeDeleteView(StaffRequiredMixin, View):
         elif node_type == "http":
             http_node = SSNode.objects.get(node_id=node_id)
             http_node.delete()
+        elif node_type == "socks5":
+            socks5_node = SSNode.objects.get(node_id=node_id)
+            socks5_node.delete()
         messages.success(request, "成功啦", extra_tags="删除节点")
         return HttpResponseRedirect(reverse("sspanel:admin_node_list"))
 
@@ -127,6 +142,8 @@ class UserOnlineIpLogView(StaffRequiredMixin, View):
         for node in SSNode.get_active_nodes():
             data.extend(UserOnLineIpLog.get_recent_log_by_node_id(node.node_id))
         for node in HttpNode.get_active_nodes():
+            data.extend(UserOnLineIpLog.get_recent_log_by_node_id(node.node_id))
+        for node in Socks5Node.get_active_nodes():
             data.extend(UserOnLineIpLog.get_recent_log_by_node_id(node.node_id))
         for node in VmessNode.get_active_nodes():
             data.extend(UserOnLineIpLog.get_recent_log_by_node_id(node.node_id))

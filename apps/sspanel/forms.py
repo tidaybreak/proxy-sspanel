@@ -9,6 +9,7 @@ from apps.sspanel.models import (
     User,
     SSNode,
     HttpNode,
+    Socks5Node,
     VmessNode,
 )
 
@@ -148,6 +149,28 @@ class SSNodeForm(ModelForm):
 class HttpNodeForm(ModelForm):
     class Meta:
         model = HttpNode
+        fields = "__all__"
+        widgets = {
+            "node_id": forms.NumberInput(attrs={"class": "input"}),
+            "level": forms.NumberInput(attrs={"class": "input"}),
+            "enlarge_scale": forms.NumberInput(attrs={"class": "input"}),
+            "name": forms.TextInput(attrs={"class": "input"}),
+            "info": forms.TextInput(attrs={"class": "input"}),
+            "server": forms.TextInput(attrs={"class": "input"}),
+            "method": forms.Select(attrs={"class": "input"}),
+            "country": forms.Select(attrs={"class": "input"}),
+            "used_traffic": forms.NumberInput(attrs={"class": "input"}),
+            "total_traffic": forms.NumberInput(attrs={"class": "input"}),
+            "enable": forms.CheckboxInput(attrs={"class": "checkbox"}),
+            "custom_method": forms.CheckboxInput(attrs={"class": "checkbox"}),
+            "speed_limit": forms.NumberInput(attrs={"class": "input"}),
+            "port": forms.NumberInput(attrs={"class": "input"}),
+        }
+
+
+class Socks5NodeForm(ModelForm):
+    class Meta:
+        model = Socks5Node
         fields = "__all__"
         widgets = {
             "node_id": forms.NumberInput(attrs={"class": "input"}),

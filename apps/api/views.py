@@ -15,6 +15,7 @@ from apps.sspanel.models import (
     NodeOnlineLog,
     SSNode,
     HttpNode,
+    Socks5Node,
     User,
     UserCheckInLog,
     UserOnLineIpLog,
@@ -240,6 +241,9 @@ class V2rayApiTrafficView(View):
     def post(self, request, node_id):
         node_type = UserTrafficLog.NODE_TYPE_HTTP
         node = HttpNode.get_or_none_by_node_id(node_id)
+        if not node:
+            node_type = UserTrafficLog.NODE_TYPE_SOCKS5
+            node = Socks5Node.get_or_none_by_node_id(node_id)
         if not node:
             node_type = UserTrafficLog.NODE_TYPE_SS
             node = SSNode.get_or_none_by_node_id(node_id)

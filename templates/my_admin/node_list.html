@@ -73,6 +73,9 @@
                         {% elif node.node_type == "http" %}
                             <p class="subtitle"><a class="is-link" href="https://github.com/Ehco1996/aioshadowsocks">专用Http后端
                             </a>对接地址:</p>
+                        {% elif node.node_type == "socks5" %}
+                            <p class="subtitle"><a class="is-link" href="https://github.com/Ehco1996/aioshadowsocks">专用Socks5后端
+                            </a>对接地址:</p>
                         {% else %}
                         <p class="subtitle"><a class="is-link" href="https://github.com/Ehco1996/v2scar">专用V2ray
                             </a>后端对接地址:</p>
@@ -143,6 +146,7 @@
         <p align="right">
             <a class="button is-danger is-outlined" href="{% url 'sspanel:admin_node' node_type='ss' %}">增加SS节点</a>
             <a class="button is-danger is-outlined" href="{% url 'sspanel:admin_node' node_type='http' %}">增加Http节点</a>
+            <a class="button is-danger is-outlined" href="{% url 'sspanel:admin_node' node_type='socks5' %}">增加Socks5节点</a>
             <a class="button is-info is-outlined" href="{% url 'sspanel:admin_node' node_type='vmess' %}">增加VMESS节点</a>
         </p>
     </div>

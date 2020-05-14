@@ -235,6 +235,105 @@
     </div>
     {% endif %}
 
+    <hr>
+    {% if socks5_node_list %}
+    <div id="id-socks5-node-list">
+        {% for node in socks5_node_list %}
+        <div class="node-cell" data-id="{{ node.node_id }}" data-socks5_link="{{ node.socks5_link }}">
+            <div class="card">
+                <div class="card-header">
+                    {% if node.online == True %}
+                    <p class="card-header-title">
+                        <span class="tag is-primary is-rounded is-hidden-mobile">Socks5</span>
+                        <span class="tag is-success is-rounded">在线</span>&nbsp;{{ node.name }}
+                    </p>
+                    {% else %}
+                    <p class="card-header-title">
+                        <span class="tag is-primary is-rounded is-hidden-mobile">Socks5</span>
+                        <span class="tag is-danger is-rounded">掉线</span>&nbsp;{{ node.name }}
+                    </p>
+                    {% endif %}
+                    <p class="card-header-icon">地区：
+                        <span class="icon">
+                        <i class="flag-icon flag-icon-{{ node.country }}"></i>
+                    </span>
+                    </p>
+                    <a id="id-icon-{{ node.node_id }}" class="card-header-icon"
+                       onclick="$(`#id-socks5-card-body-${ {{ node.node_id }} }`).toggle('swing')">
+                    <span class="icon">
+                        <i class="fa fa-ellipsis-v"></i>
+                    </span>
+                    </a>
+                </div>
+                {% if user.level >= node.level %}
+                <div id="id-socks5-card-body-{{ node.node_id }}" hidden="true">
+                    <div class="card-content">
+                        <div class="content">
+                            <p>{{ node.info }}</p>
+                            {%if node.human_speed_limit != "不限速" %}
+                            <p>限速：<code>{{ node.human_speed_limit }}</code></p>
+                            {% endif %}
+                            {%if node.enlarge_scale != 1.00 %}
+                            <p>流量倍率：<code>{{ node.enlarge_scale }}</code></p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <a class="card-footer-item modal-button" data-target="socks5-modal-config-{{ node.node_id }}">配置</a>
+                        <a class="card-footer-item">
+                        <span class="icon">
+                            <i class="fa fa-user">「{{ node.online_user_count }}/{{node.active_tcp_connections}}」</i>
+                        </span>
+                        </a>
+                    </div>
+                    <!--配置部分 -->
+                    <div class="modal nodeinfo" id="socks5-modal-config-{{ node.node_id }}">
+                        <div class="modal-background"></div>
+                        <div class="modal-card">
+                            <header class="modal-card-head">
+                                <p class="modal-card-title">节点配置信息:</p>
+                                <button class="delete"></button>
+                            </header>
+                            <section class="modal-card-body">
+                                <table class="table is-fullwidth is-bordered is-striped ">
+                                    <tr>
+                                        <td class="notification">节点地址:</td>
+                                        <td class="notification">{{ node.server }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="notification">端口:</td>
+                                        <td class="notification">{{ node.port }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="notification">密码:</td>
+                                        <td class="notification">{{ node.proxy_password }}</td>
+                                    </tr>
+                                </table>
+                            </section>
+                        </div>
+                    </div>
+
+                </div>
+                {% else %}
+                <div id="id-socks5-card-body-{{ node.node_id }}" hidden="true">
+                    <div class="card-content">
+                        <article class="message is-danger">
+                            <div class="message-body">
+                                <p>该线路为VIP线路
+                                    <strong>购买对应商品 提升至等级:「{{node.level}}」后</strong> 才能看见节点配置哟！</p>
+                                <a class="is-link" href="{% url 'sspanel:shop' %}">点我购买！</a>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% if not forloop.last %}<br>{% endif %}
+        {% endfor %}
+    </div>
+    {% endif %}
+
     {% if vmess_node_list %}
     <hr>
     <div id="id-vmess-node-list">

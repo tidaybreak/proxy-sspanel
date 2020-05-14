@@ -11,5 +11,5 @@ RUN set -e; \
     # TODO workaround start
     && apk add mariadb-dev \
     # TODO workaround end
-    && pip install --no-cache-dir -r /tmp/requirements.txt \
+    && pip install --no-cache-dir -r /tmp/requirements.tuwsgixt \
     && apk del .build-deps

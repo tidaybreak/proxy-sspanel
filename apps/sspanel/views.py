@@ -21,6 +21,7 @@ from apps.sspanel.models import (
     User,
     SSNode,
     HttpNode,
+    Socks5Node,
     VmessNode,
 )
 from apps.utils import traffic_format
@@ -162,6 +163,9 @@ class NodeInfoView(LoginRequiredMixin, View):
         http_node_list = [
             node.to_dict_with_extra_info(user) for node in HttpNode.get_active_nodes()
         ]
+        socks5_node_list = [
+            node.to_dict_with_extra_info(user) for node in Socks5Node.get_active_nodes()
+        ]
         # vmess node
         vmess_node_list = [
             node.to_dict_with_extra_info(user) for node in VmessNode.get_active_nodes()
@@ -169,6 +173,7 @@ class NodeInfoView(LoginRequiredMixin, View):
         context = {
             "ss_node_list": ss_node_list,
             "http_node_list": http_node_list,
+            "socks5_node_list": socks5_node_list,
             "vmess_node_list": vmess_node_list,
             "user": user,
         }
@@ -180,11 +185,13 @@ class UserTrafficLog(LoginRequiredMixin, View):
     def get(self, request):
         ss_node_list = SSNode.get_active_nodes()
         http_node_list = HttpNode.get_active_nodes()
+        socks5_node_list = Socks5Node.get_active_nodes()
         vmess_node_list = VmessNode.get_active_nodes()
         context = {
             "user": request.user,
             "ss_node_list": ss_node_list,
             "http_node_list": http_node_list,
+            "socks5_node_list": socks5_node_list,
             "vmess_node_list": vmess_node_list,
         }
         return render(request, "sspanel/user_traffic_log.html", context=context)
