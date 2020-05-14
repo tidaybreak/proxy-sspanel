@@ -29,7 +29,7 @@
                 </button>
                 <button class="button is-rounded">
                     <a>
-                        <span id="id-change-port">重置端口</span>
+                        <span id="id-change-port">重置SS端口</span>
                     </a>
                 </button>
                 <hr>
@@ -103,7 +103,7 @@
                 </div>
                 <div class="field is-grouped">
                     <div class="control has-icons-left">
-                        <input name="num" class="input is-rounded" placeholder="更换Proxy密码" id="id-proxy-password">
+                        <input name="num" class="input is-rounded" placeholder="更换Http Socks5密码" id="id-proxy-password">
                         <div class="icon is-small is-left">
                             <i class="fa fa-key"></i>
                         </div>
@@ -148,20 +148,20 @@
                         <p>连接信息</p>
                     </div>
                     <div class="message-body">
-                        <li> ss端口：
+                        <li> SS端口：
                             <code><span id="port">{{ user.ss_port }}</span></code>
                         </li>
-                        <li> ss密码：
+                        <li> SS密码：
                             <code>{{ user.ss_password }}</code>
                         </li>
-                        <li> ss加密：
+                        <li> SS加密：
                             <code>{{ user.ss_method }}</code>
                         </li>
-                        <li> UUID：
+                        <li> Vmess UUID：
                             <code>{{ user.vmess_uuid }}</code>
                         </li>
-                        <li> http端口：
-                            <code><span id="http_port">{{ user.http_port }}</span></code>
+                        <li> HTTP SOCKS5端口：
+                            <code><span>节点中查看</span></code>
                         </li>
                         <li> proxy密码：
                             <code>{{ user.proxy_password }}</code>

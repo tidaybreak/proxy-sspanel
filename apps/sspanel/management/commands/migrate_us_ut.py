@@ -17,8 +17,6 @@ class Command(BaseCommand):
             user.ss_password = us.password
             user.ss_method = us.method
 
-            user.http_port = us.port
-            user.socks_port = us.port
             user.proxy_password = us.password
 
             user.upload_traffic = ut.upload_traffic

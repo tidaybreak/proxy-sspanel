@@ -89,9 +89,9 @@ class User(AbstractUser):
     )
 
     # http socks
-    proxy_password = models.CharField("密码", max_length=32, default=get_short_random_string)
-    http_port = models.IntegerField("Http端口", unique=True, default=MIN_PORT)
-    socks_port = models.IntegerField("Socks端口", unique=True, default=MIN_PORT)
+    proxy_password = models.CharField("http|s5密码", max_length=32, default=get_short_random_string)
+    #http_port = models.IntegerField("Http端口", unique=True, default=MIN_PORT)
+    #socks_port = models.IntegerField("Socks端口", unique=True, default=MIN_PORT)
 
     # 流量相关
     upload_traffic = models.BigIntegerField("上传流量", default=0)
@@ -1216,7 +1216,6 @@ class HttpNode(BaseAbstractNode):
 
         for d in User.objects.filter(level__gte=http_node.level).values(
                 "id",
-                "http_port",
                 "proxy_password",
                 "total_traffic",
                 "upload_traffic",
@@ -1226,7 +1225,6 @@ class HttpNode(BaseAbstractNode):
             configs["users"].append(
                 {
                     "user_id": d["id"],
-                    "port": d["http_port"],
                     "password": d["ss_password"],
                     "enable": enable,
                     "speed_limit": http_node.speed_limit,
@@ -1256,7 +1254,7 @@ class HttpNode(BaseAbstractNode):
         )
 
     def get_http_link(self, user):
-        code = f"{user.proxy_password}@{self.server}:{user.http_port}"
+        code = f"{user.proxy_password}@{self.server}:{self.port}"
         b64_code = base64.urlsafe_b64encode(code.encode()).decode()
         http_link = "http://{}#{}".format(b64_code, quote(self.name))
         return http_link

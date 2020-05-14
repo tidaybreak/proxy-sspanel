@@ -216,8 +216,6 @@ class UserForm(ModelForm):
             "ss_password",
             "ss_method",
             "proxy_password",
-            "http_port",
-            "socks_port",
         ]
         widgets = {
             "balance": forms.NumberInput(attrs={"class": "input"}),
@@ -227,6 +225,4 @@ class UserForm(ModelForm):
             "ss_password": forms.TextInput(attrs={"class": "input"}),
             "ss_method": forms.Select(attrs={"class": "input"}),
             "proxy_password": forms.TextInput(attrs={"class": "input"}),
-            "http_port": forms.NumberInput(attrs={"class": "input"}),
-            "socks_port": forms.NumberInput(attrs={"class": "input"}),
         }

@@ -1,5 +1,20 @@
 # django-sspanel
-用diango开发的全新的shadowsocks网络面板
+用diango开发的全新的proxy网络面板
+
+docker stop proxy-sspanel
+docker rm proxy-sspanel
+
+docker run -d \
+--name proxy-sspanel \
+--privileged     \
+--restart always     \
+--net mynet     \
+--ip 172.18.0.35 \
+--mount type=bind,source=/data,target=/data \
+proxy-sspanel:v1 \
+/bin/sh /data/ofidc/docker-volume/proxy-sspanel/run.sh
+
+
 
 
 * 视频安装教程:[地址](https://youtu.be/BRHcdGeufvY)
