@@ -1,3 +1,4 @@
+import pendulum
 from django.db.models.signals import post_save, pre_delete, pre_save
 
 from apps.ext import cache
@@ -6,6 +7,7 @@ from apps.sspanel import models as m
 
 def set_user_pre_save_level(sender, instance, *args, **kwargs):
     old_user = m.User.get_or_none(instance.pk)
+    instance.change_time = pendulum.now()
     if old_user:
         instance._pre_level = old_user.level
 

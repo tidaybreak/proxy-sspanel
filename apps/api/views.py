@@ -1,4 +1,6 @@
 import pendulum
+import time
+from django.utils import timezone
 from django.conf import settings
 from django.contrib.auth.decorators import login_required, permission_required
 from django.http import HttpResponse, HttpResponseNotFound, JsonResponse
@@ -203,117 +205,150 @@ class UserSSConfigView(View):
         return JsonResponse(data={})
 
 
-class V2rayApiUserInfoView(View):
+class ChangeUserInfoView(View):
     @csrf_exempt
     def dispatch(self, *args, **kwargs):
-        return super(V2rayApiUserInfoView, self).dispatch(*args, **kwargs)
+        return super(ChangeUserInfoView, self).dispatch(*args, **kwargs)
 
     @method_decorator(api_authorized)
-    def get(self, request, node_id):
-        configs = VmessNode.get_user_vmess_configs_by_node_id(node_id)
-        return JsonResponse(configs)
+    def get(self, request):
+        return JsonResponse(data={})
 
     @method_decorator(handle_json_post)
     @method_decorator(api_authorized)
-    def post(self, request, node_id):
-        user_name = request.json["id"]
-        try:
-            user_info = User.get_by_user_name(user_name)
-            data = {"username": user_info.username, "password": user_info.proxy_password}
-        except Exception as err:
-            data = {}
+    def post(self, request):
+        total = request.json["total"]
+        last_time = request.json["last_time"]
 
-        return JsonResponse(data=data)
+        nodes = VmessNode.get_active_nodes()
+        tags = []
+        for d in nodes:
+            tags.append(d.inbound_tag)
+
+        configs = []
+        last_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(last_time))
+        last_time = pendulum.parse(last_time, tz=timezone.get_current_timezone())
+        for d in User.objects.filter(change_time__gte=last_time).values(
+                "id",
+                "username",
+                "proxy_password",
+                "email",
+                "vmess_uuid",
+                "total_traffic",
+                "upload_traffic",
+                "download_traffic",
+        ):
+            enable = d["total_traffic"] > (d["download_traffic"] + d["upload_traffic"])
+            configs.append(
+                {
+                    "user_id": d["id"],
+                    "name": d["username"],
+                    "ppwd": d["proxy_password"],
+                    "email": d["email"],
+                    "uuid": d["vmess_uuid"],
+                    "level": 0,
+                    "alter_id": 0,
+                    "ut": d["upload_traffic"],
+                    "dt": d["download_traffic"],
+                    "utm": d["total_traffic"],
+                    "dtm": d["total_traffic"],
+                    "enable": enable,
+                }
+            )
+        reesult = {
+            "configs": configs,
+            "vmess_tags": tags,
+        }
+        return JsonResponse(reesult)
 
 
-class V2rayApiTrafficView(View):
+class UpdateTrafficView(View):
     @csrf_exempt
     def dispatch(self, *args, **kwargs):
-        return super(V2rayApiTrafficView, self).dispatch(*args, **kwargs)
+        return super(UpdateTrafficView, self).dispatch(*args, **kwargs)
 
     @method_decorator(api_authorized)
-    def get(self, request, node_id):
-        configs = VmessNode.get_user_vmess_configs_by_node_id(node_id)
-        return JsonResponse(configs)
+    def get(self, request):
+        return JsonResponse(data={})
 
     @method_decorator(handle_json_post)
     @method_decorator(api_authorized)
-    def post(self, request, node_id):
-        node_type = UserTrafficLog.NODE_TYPE_HTTP
-        node = HttpNode.get_or_none_by_node_id(node_id)
-        if not node:
-            node_type = UserTrafficLog.NODE_TYPE_SOCKS5
-            node = Socks5Node.get_or_none_by_node_id(node_id)
-        if not node:
-            node_type = UserTrafficLog.NODE_TYPE_SS
-            node = SSNode.get_or_none_by_node_id(node_id)
-        if not node:
-            node_type = UserTrafficLog.NODE_TYPE_VMESS
-            node = VmessNode.get_or_none_by_node_id(node_id)
-        if not node:
-            return HttpResponseNotFound()
-
-        log_time = pendulum.now()
-        node_total_traffic = 0
-        need_clear_cache = False
+    def post(self, request):
+        user_model_list = []
         trafficlog_model_list = []
         online_ip_log_model_list = []
-        active_tcp_connections = 0
-        user_model_list = []
-        user_traffics = []
-        for traffic in request.json:
-            username = traffic["id"]
-            u = int(traffic["ut"] * node.enlarge_scale)
-            d = int(traffic["dt"] * node.enlarge_scale)
-            # 个人流量增量
-            user = User.get_by_user_name(username)
-            user.download_traffic += d
-            user.upload_traffic += u
-            user.last_use_time = log_time
-            user_model_list.append(user)
-            user_traffics.append({"id": username, "ut": user.upload_traffic, "dt": user.download_traffic,
-                                  "utm": user.total_traffic, "dtm": user.total_traffic})
-            if user.overflow:
-                need_clear_cache = True
-            # 个人流量记录
-            trafficlog_model_list.append(
-                UserTrafficLog(
-                    node_type=node_type,
-                    node_id=node_id,
-                    user_id=user.id,
-                    download_traffic=u,
-                    upload_traffic=d,
-                )
-            )
-            # 节点流量增量
-            node_total_traffic += u + d
-            # active_tcp_connections
-            active_tcp_connections += traffic["tcn"]
-            # online ip log
-            if traffic.get("ips", None) is not None:
-                for ip in traffic.get("ips", []):
-                    online_ip_log_model_list.append(
-                        UserOnLineIpLog(user_id=user.id, node_id=node_id, ip=ip)
-                    )
+        for node_id in request.json:
+            node_type = UserTrafficLog.NODE_TYPE_HTTP
+            node = HttpNode.get_or_none_by_node_id(node_id)
+            if not node:
+                node_type = UserTrafficLog.NODE_TYPE_SOCKS5
+                node = Socks5Node.get_or_none_by_node_id(node_id)
+            if not node:
+                node_type = UserTrafficLog.NODE_TYPE_SS
+                node = SSNode.get_or_none_by_node_id(node_id)
+            if not node:
+                node_type = UserTrafficLog.NODE_TYPE_VMESS
+                node = VmessNode.get_or_none_by_node_id(node_id)
+            if not node:
+                continue
 
-        # 节点流量记录
-        node.increase_used_traffic(node_id, node_total_traffic)
-        # 流量记录
-        UserTrafficLog.objects.bulk_create(trafficlog_model_list)
-        # TODO 在线IP
+            log_time = pendulum.now()
+            node_total_traffic = 0
+            need_clear_cache = False
+            active_tcp_connections = 0
+            for traffic in request.json[node_id]:
+                uid = traffic["uid"]
+                u = int(traffic["ut"] * node.enlarge_scale)
+                d = int(traffic["dt"] * node.enlarge_scale)
+                # 个人流量增量
+                user = User.get_by_id(uid)
+                user.download_traffic += d
+                user.upload_traffic += u
+                user.last_use_time = log_time
+                user.change_time = log_time
+                user_model_list.append(user)
+
+                if user.overflow:
+                    need_clear_cache = True
+                # 个人流量记录
+                trafficlog_model_list.append(
+                    UserTrafficLog(
+                        node_type=node_type,
+                        node_id=node_id,
+                        user_id=user.id,
+                        download_traffic=u,
+                        upload_traffic=d,
+                    )
+                )
+                # 节点流量增量
+                node_total_traffic += u + d
+                # active_tcp_connections
+                active_tcp_connections += traffic["tcn"]
+                # online ip log
+                if traffic.get("ips", None) is not None:
+                    for ip in traffic.get("ips", []):
+                        online_ip_log_model_list.append(
+                            UserOnLineIpLog(user_id=user.id, node_id=node_id, ip=ip)
+                        )
+
+            # 节点流量记录
+            node.increase_used_traffic(node_id, node_total_traffic)
+            # TODO 在线IP
+            # 节点在线人数
+            NodeOnlineLog.add_log(node_type, node_id, len(request.json), active_tcp_connections)
+            # check node && user traffic
+            if need_clear_cache or node.overflow:
+                node.save()
+
         # 个人流量记录
         User.objects.bulk_update(
-            user_model_list, ["download_traffic", "upload_traffic", "last_use_time"],
+            user_model_list, ["download_traffic", "upload_traffic", "last_use_time", "change_time"],
         )
+        # 流量记录
+        UserTrafficLog.objects.bulk_create(trafficlog_model_list)
         # 在线IP
         UserOnLineIpLog.objects.bulk_create(online_ip_log_model_list)
-        # 节点在线人数
-        NodeOnlineLog.add_log(node_type, node_id, len(request.json), active_tcp_connections)
-        # check node && user traffic
-        if need_clear_cache or node.overflow:
-            node.save()
-
-        return JsonResponse(data=user_traffics, safe=False)
+        return JsonResponse(data={}, safe=False)
 
 
 class UserVmessConfigView(View):

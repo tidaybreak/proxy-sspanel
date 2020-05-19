@@ -52,6 +52,8 @@ class User(AbstractUser):
     class Meta(AbstractUser.Meta):
         verbose_name_plural = "用户"
 
+    email = models.EmailField(blank=False, unique=True)
+
     balance = models.DecimalField(
         verbose_name="余额",
         decimal_places=2,
@@ -80,9 +82,9 @@ class User(AbstractUser):
     inviter_id = models.PositiveIntegerField(verbose_name="邀请人id", default=1)
 
     # v2ray相关
-    vmess_uuid = models.CharField(verbose_name="Vmess uuid", max_length=64, default="")
+    vmess_uuid = models.CharField(verbose_name="Vmess uuid", max_length=64, default=str(uuid4()))
 
-    ss_port = models.IntegerField("SS端口", unique=True, default=MIN_PORT)
+    ss_port = models.IntegerField("SS端口", default=MIN_PORT)
     ss_password = models.CharField("密码", max_length=32, default=get_short_random_string)
     ss_method = models.CharField(
         "加密", default=settings.DEFAULT_METHOD, max_length=32, choices=METHOD_CHOICES
@@ -98,6 +100,7 @@ class User(AbstractUser):
     download_traffic = models.BigIntegerField("下载流量", default=0)
     total_traffic = models.BigIntegerField("总流量", default=settings.DEFAULT_TRAFFIC)
     last_use_time = models.DateTimeField("上次使用时间", blank=True, db_index=True, null=True)
+    change_time = models.DateTimeField("更新时间", blank=True, db_index=True, editable=False, null=True)
 
     def __str__(self):
         return self.username
@@ -140,6 +143,10 @@ class User(AbstractUser):
     @classmethod
     def get_by_user_name(cls, username):
         return cls.objects.get(username=username)
+
+    @classmethod
+    def get_by_id(cls, id):
+        return cls.objects.get(id=id)
 
     @classmethod
     def get_by_pk(cls, pk):
@@ -628,6 +635,7 @@ class UserSocks5Config(models.Model, UserPropertyMixin):
     @classmethod
     def get_by_user_id(cls, user_id):
         return cls.objects.get(user_id=user_id)
+
 
 class UserTraffic(models.Model, UserPropertyMixin):
     # TODO delete this table

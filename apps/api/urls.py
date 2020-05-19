@@ -19,14 +19,14 @@ urlpatterns = [
         name="user_ss_config",
     ),
     path(
-        "v2ray_api_userinfo/<int:node_id>/",
-        views.V2rayApiUserInfoView.as_view(),
+        "get_change_user/",
+        views.ChangeUserInfoView.as_view(),
         name="v2 ray api userinfo",
     ),
     path(
-        "v2ray_api_traffic/<int:node_id>/",
-        views.V2rayApiTrafficView.as_view(),
-        name="v2 ray api traffic",
+        "update_traffic/",
+        views.UpdateTrafficView.as_view(),
+        name="api traffic",
     ),
     path(
         "user_vmess_config/<int:node_id>/",

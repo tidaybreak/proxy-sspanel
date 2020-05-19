@@ -84,6 +84,14 @@ class Migration(migrations.Migration):
                         verbose_name="上次使用时间",
                     ),
                 ),
+                (
+                    "change_time",
+                    models.DateTimeField(
+                        db_index=True,
+                        default=datetime.datetime(1996, 2, 2, 0, 0, 0),
+                        verbose_name="更新时间",
+                    ),
+                ),
             ],
             options={"verbose_name_plural": "用户流量"},
         ),
