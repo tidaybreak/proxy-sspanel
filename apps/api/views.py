@@ -335,7 +335,7 @@ class UpdateTrafficView(View):
             node.increase_used_traffic(node_id, node_total_traffic)
             # TODO 在线IP
             # 节点在线人数
-            NodeOnlineLog.add_log(node_type, node_id, len(request.json), active_tcp_connections)
+            NodeOnlineLog.add_log(node_type, node_id, len(request.json[node_id]), active_tcp_connections)
             # check node && user traffic
             if need_clear_cache or node.overflow:
                 node.save()
