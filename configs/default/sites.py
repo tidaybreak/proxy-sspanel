@@ -1,5 +1,5 @@
 # 网站域名设置（请正确填写，不然订阅功能会失效：
-HOST = "http://14.29.84.53:9000"
+HOST = "http://proxy.wy2.com"
 
 # 网站密钥
 SECRET_KEY = "aasdasdas"
