@@ -46,7 +46,7 @@ class User(AbstractUser):
         (SUB_TYPE_CLASH, "通过Clash订阅所有"),
     )
 
-    MIN_PORT = 1025
+    MIN_PORT = 30000
     PORT_BLACK_SET = {6443, 8472}
 
     class Meta(AbstractUser.Meta):
@@ -85,13 +85,13 @@ class User(AbstractUser):
     vmess_uuid = models.CharField(verbose_name="Vmess uuid", max_length=64, default=str(uuid4()))
 
     ss_port = models.IntegerField("SS端口", default=MIN_PORT)
-    ss_password = models.CharField("密码", max_length=32, default=get_short_random_string)
+    ss_password = models.CharField("SS密码", max_length=32, default=get_short_random_string)
     ss_method = models.CharField(
-        "加密", default=settings.DEFAULT_METHOD, max_length=32, choices=METHOD_CHOICES
+        "SS加密", default=settings.DEFAULT_METHOD, max_length=32, choices=METHOD_CHOICES
     )
 
     # http socks
-    proxy_password = models.CharField("http|s5密码", max_length=32, default=get_short_random_string)
+    proxy_password = models.CharField("HTTP|S5密码", max_length=32, default=get_short_random_string)
     #http_port = models.IntegerField("Http端口", unique=True, default=MIN_PORT)
     #socks_port = models.IntegerField("Socks端口", unique=True, default=MIN_PORT)
 
@@ -582,7 +582,7 @@ class UserCheckInLog(models.Model, UserPropertyMixin):
 
 class UserSSConfig(models.Model, UserPropertyMixin):
     # TODO delete this table
-    MIN_PORT = 1025
+    MIN_PORT = 30000
     PORT_BLACK_SET = {6443, 8472}
 
     user_id = models.IntegerField(unique=True, db_index=True)
