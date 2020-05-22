@@ -1,10 +1,11 @@
 METHOD_CHOICES = (
     ("aes-256-cfb", "aes-256-cfb"),
-    ("aes-128-ctr", "aes-128-ctr"),
-    ("rc4-md5", "rc4-md5"),
-    ("salsa20", "salsa20"),
+    ("aes-128-cfb", "aes-128-cfb"),
     ("chacha20", "chacha20"),
-    ("none", "none"),
+    ("chacha20-ietf", "chacha20-ietf"),
+    ("aes-128-gcm", "aes-128-gcm"),
+    ("aes-256-gcm", "aes-256-gcm"),
+    ("chacha20-poly1305", "chacha20-poly1305"),
 )
 
 
