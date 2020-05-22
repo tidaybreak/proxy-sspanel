@@ -160,13 +160,12 @@
                         <li> Vmess UUID：
                             <code>{{ user.vmess_uuid }}</code>
                         </li>
+                        <li> HTTP SOCKS5用户：
+                            <code>{{ user.email }}</code>
+                        </li>
                         <li> HTTP SOCKS5密码：
-                            <code>{{ user.proxy_password }}</code>
+                            <code><span>{{ user.proxy_password }}</span></code>
                         </li>
-                        <li> Vmess HTTP SOCKS5端口：
-                            <code><span>节点信息中查看</span></code>
-                        </li>
-
                         <br>
                         <div class="buttons">
                             <span class="button is-link modal-button is-rounded" data-target="modal-sub">订阅地址</span>
