@@ -219,12 +219,6 @@ class ChangeUserInfoView(View):
     def post(self, request):
         total = request.json["total"]
         last_time = request.json["last_time"]
-
-        nodes = VmessNode.get_active_nodes()
-        tags = []
-        for d in nodes:
-            tags.append(d.inbound_tag)
-
         configs = []
         last_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(last_time))
         last_time = pendulum.parse(last_time, tz=timezone.get_current_timezone())
@@ -263,7 +257,6 @@ class ChangeUserInfoView(View):
             )
         reesult = {
             "configs": configs,
-            "vmess_tags": tags,
         }
         return JsonResponse(reesult)
 
