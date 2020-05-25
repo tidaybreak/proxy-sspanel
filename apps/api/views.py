@@ -273,9 +273,6 @@ class UpdateTrafficView(View):
     @method_decorator(handle_json_post)
     @method_decorator(api_authorized)
     def post(self, request):
-        user_model_list = []
-        trafficlog_model_list = []
-        online_ip_log_model_list = []
         for node_id in request.json:
             node_type = UserTrafficLog.NODE_TYPE_HTTP
             node = HttpNode.get_or_none_by_node_id(node_id)
@@ -291,6 +288,9 @@ class UpdateTrafficView(View):
             if not node:
                 continue
 
+            trafficlog_model_list = []
+            online_ip_log_model_list = []
+            user_model_list = []
             log_time = pendulum.now()
             node_total_traffic = 0
             need_clear_cache = False
@@ -339,14 +339,14 @@ class UpdateTrafficView(View):
             if need_clear_cache or node.overflow:
                 node.save()
 
-        # 个人流量记录
-        User.objects.bulk_update(
-            user_model_list, ["download_traffic", "upload_traffic", "last_use_time", "change_time"],
-        )
-        # 流量记录
-        UserTrafficLog.objects.bulk_create(trafficlog_model_list)
-        # 在线IP
-        UserOnLineIpLog.objects.bulk_create(online_ip_log_model_list)
+            # 个人流量记录
+            User.objects.bulk_update(
+                user_model_list, ["download_traffic", "upload_traffic", "last_use_time", "change_time"],
+            )
+            # 流量记录
+            UserTrafficLog.objects.bulk_create(trafficlog_model_list)
+            # 在线IP
+            UserOnLineIpLog.objects.bulk_create(online_ip_log_model_list)
         return JsonResponse(data={}, safe=False)
 
 
