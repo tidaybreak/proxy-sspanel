@@ -21,6 +21,9 @@ class Command(BaseCommand):
 
             user.upload_traffic = ut.upload_traffic
             user.download_traffic = ut.download_traffic
+            user.limit_session = ut.limit_session
+            user.limit_speed_up = ut.limit_speed_up
+            user.limit_speed_down = ut.limit_speed_down
             user.total_traffic = ut.total_traffic
             user.last_use_time = ut.last_use_time
             user.change_time = ut.change_time

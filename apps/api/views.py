@@ -234,6 +234,9 @@ class ChangeUserInfoView(View):
                 "total_traffic",
                 "upload_traffic",
                 "download_traffic",
+                "limit_session",
+                "limit_speed_up",
+                "limit_speed_down",
         ):
             enable = d["total_traffic"] > (d["download_traffic"] + d["upload_traffic"])
             configs.append(
@@ -252,6 +255,9 @@ class ChangeUserInfoView(View):
                     "dt": d["download_traffic"],
                     "utm": d["total_traffic"],
                     "dtm": d["total_traffic"],
+                    "ls": d["limit_session"],
+                    "lsu": d["limit_speed_up"],
+                    "lsd": d["limit_speed_down"],
                     "enable": enable,
                 }
             )
