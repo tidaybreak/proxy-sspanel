@@ -27,5 +27,6 @@ class Command(BaseCommand):
             user.total_traffic = ut.total_traffic
             user.last_use_time = ut.last_use_time
             user.change_time = ut.change_time
+            user.out_tag = ut.out_tag
             user.save()
             print(f"migrate user:{user}")
