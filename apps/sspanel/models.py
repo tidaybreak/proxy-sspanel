@@ -104,7 +104,7 @@ class User(AbstractUser):
     total_traffic = models.BigIntegerField("限总流量", default=settings.DEFAULT_TRAFFIC)
     last_use_time = models.DateTimeField("上次使用时间", blank=True, db_index=True, null=True)
     change_time = models.DateTimeField("更新时间", blank=True, db_index=True, editable=False, null=True)
-    out_tag = models.CharField("出口tag", , max_length=32, default="")
+    out_tag = models.CharField("出口tag", max_length=32, default="")
 
     def __str__(self):
         return self.username
