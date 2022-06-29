@@ -96,12 +96,12 @@ class User(AbstractUser):
     #socks_port = models.IntegerField("Socks端口", unique=True, default=MIN_PORT)
 
     # 流量相关
-    upload_traffic = models.BigIntegerField("上传流量", default=0)
-    download_traffic = models.BigIntegerField("下载流量", default=0)
+    upload_traffic = models.BigIntegerField("上传流量Bytes", default=0)
+    download_traffic = models.BigIntegerField("下载流量Bytes", default=0)
     limit_session = models.BigIntegerField("限制Session数", default=0)
     limit_speed_up = models.BigIntegerField("限上行速度KB/s", default=0)
     limit_speed_down = models.BigIntegerField("限下行速度KB/s", default=0)
-    total_traffic = models.BigIntegerField("限总流量", default=settings.DEFAULT_TRAFFIC)
+    total_traffic = models.BigIntegerField("限总流量Bytes", default=settings.DEFAULT_TRAFFIC)
     out_tag = models.CharField("出口tag", max_length=255, blank=True, default="", null=True)
     last_use_time = models.DateTimeField("上次使用时间", blank=True, db_index=True, null=True)
     change_time = models.DateTimeField("更新时间", blank=True, db_index=True, editable=False, null=True)
