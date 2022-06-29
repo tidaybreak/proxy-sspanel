@@ -84,7 +84,7 @@ class User(AbstractUser):
     # v2ray相关
     vmess_uuid = models.CharField(verbose_name="Vmess uuid", max_length=64, default=str(uuid4()))
 
-    ss_port = models.IntegerField("SS端口", default=MIN_PORT)
+    ss_port = models.IntegerField("SS端口", default="")
     ss_password = models.CharField("SS密码", max_length=32, default=get_short_random_string)
     ss_method = models.CharField(
         "SS加密", default=settings.DEFAULT_METHOD, max_length=32, choices=METHOD_CHOICES
@@ -98,7 +98,7 @@ class User(AbstractUser):
     # 流量相关
     upload_traffic = models.BigIntegerField("上传流量", default=0)
     download_traffic = models.BigIntegerField("下载流量", default=0)
-    limit_session = models.BigIntegerField("限制Session", default=0)
+    limit_session = models.BigIntegerField("限制Session数", default=0)
     limit_speed_up = models.BigIntegerField("限下行速度KB/s", default=0)
     limit_speed_down = models.BigIntegerField("限上行速度KB/s", default=0)
     total_traffic = models.BigIntegerField("限总流量", default=settings.DEFAULT_TRAFFIC)
