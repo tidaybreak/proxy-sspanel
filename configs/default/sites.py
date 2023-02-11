@@ -21,7 +21,7 @@ DEFAULT_TRAFFIC = 5 * GB
 START_PORT = 1024
 
 # 默认加密混淆协议
-DEFAULT_METHOD = "aes-256-cfb"
+DEFAULT_METHOD = "aes-256-gcm"
 
 # 签到流量设置
 MIN_CHECKIN_TRAFFIC = 10 * MB
