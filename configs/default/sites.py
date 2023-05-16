@@ -1,5 +1,5 @@
 # 网站域名设置（请正确填写，不然订阅功能会失效：
-HOST = "http://proxy.wy2.com"
+HOST = "http://proxy.tiham.com"
 
 # 网站密钥
 SECRET_KEY = "aasdasdas"
