@@ -3,14 +3,15 @@ import json
 import random
 import time
 from functools import wraps
+from uuid import uuid4
 
 from django.conf import settings
 from django.http import JsonResponse
 
 
 def get_random_string(
-    length=12,
-    allowed_chars="abcdefghijklmnopqrstuvwxyz" "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
+        length=12,
+        allowed_chars="abcdefghijklmnopqrstuvwxyz" "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
 ):
     """
     创建指定长度的完全不会重复字符串的
@@ -31,6 +32,10 @@ def get_long_random_string():
 
 def get_short_random_string():
     return get_random_string(12)
+
+
+def get_vmess_uuid():
+    return str(uuid4())
 
 
 def traffic_format(traffic):

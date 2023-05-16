@@ -5,7 +5,7 @@ from . import models
 
 
 class UserAdmin(admin.ModelAdmin):
-    list_display = ["username", "id", "level", "balance", "used_percentage"]
+    list_display = ["username", "id", "first_name", "level", "last_use_time", "limit_session", "limit_speed_up", "limit_speed_down", "used_percentage"]
     search_fields = ["username", "email", "id"]
     list_filter = ["level"]
 

@@ -29,7 +29,7 @@ from apps.constants import (
     THEME_CHOICES,
 )
 from apps.ext import cache, encoder, pay
-from apps.utils import get_long_random_string, get_short_random_string, traffic_format
+from apps.utils import get_long_random_string, get_short_random_string, traffic_format, get_vmess_uuid
 
 
 class User(AbstractUser):
@@ -82,7 +82,7 @@ class User(AbstractUser):
     inviter_id = models.PositiveIntegerField(verbose_name="邀请人id", default=1)
 
     # v2ray相关
-    vmess_uuid = models.CharField(verbose_name="Vmess uuid", max_length=64, default=str(uuid4()))
+    vmess_uuid = models.CharField(verbose_name="Vmess uuid", max_length=64, default=get_vmess_uuid)
 
     ss_port = models.IntegerField("SS端口", default="", blank=True, null=True)
     ss_password = models.CharField("SS密码", max_length=32, default=get_short_random_string)
@@ -98,9 +98,9 @@ class User(AbstractUser):
     # 流量相关
     upload_traffic = models.BigIntegerField("上传流量Bytes", default=0)
     download_traffic = models.BigIntegerField("下载流量Bytes", default=0)
-    limit_session = models.BigIntegerField("限制Session数", default=0)
-    limit_speed_up = models.BigIntegerField("限上行速度KB/s", default=0)
-    limit_speed_down = models.BigIntegerField("限下行速度KB/s", default=0)
+    limit_session = models.BigIntegerField("限制Session数", default=100)
+    limit_speed_up = models.BigIntegerField("限上行速度KB/s", default=500)
+    limit_speed_down = models.BigIntegerField("限下行速度KB/s", default=500)
     total_traffic = models.BigIntegerField("限总流量Bytes", default=settings.DEFAULT_TRAFFIC)
     out_tag = models.CharField("出口tag", max_length=255, blank=True, default="", null=True)
     last_use_time = models.DateTimeField("上次使用时间", blank=True, db_index=True, null=True)
