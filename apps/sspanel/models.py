@@ -545,9 +545,9 @@ class UserOnLineIpLog(models.Model, UserPropertyMixin):
             node_id=node_id,
             created_at__range=[now.subtract(seconds=NODE_TIME_OUT), now],
         ):
-            if log.ip not in ip_set:
-                ret.append(log)
-            ip_set.add(log.ip)
+            #if log.ip not in ip_set:
+            ret.append(log)
+            #ip_set.add(log.ip)
         return ret
 
     @classmethod
@@ -582,7 +582,8 @@ class UserOnLineIpLog(models.Model, UserPropertyMixin):
                 user_id=user_id,
                 created_at__range=[twenty_four_hours_ago, now],
         ):
-            ret.append(log.ip)
+            if log.ip not in ret:
+                ret.append(log.ip)
         return ret
 
     @classmethod

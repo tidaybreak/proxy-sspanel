@@ -58,4 +58,4 @@ THEME_CHOICES = (
 
 
 # 判断节点在线时间间隔
-NODE_TIME_OUT = 75
+NODE_TIME_OUT = 3600 * 24
