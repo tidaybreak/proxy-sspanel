@@ -360,11 +360,12 @@ class UpdateTrafficView(View):
                     else:
                         logs = UserOnLineIpLog.ip_today(user.id, node_id, None)
                         for log in logs:
-                            log.count = 0
-                            log.update_at = pendulum.now()
-                            online_ip_log_model_update_list.append(
-                                log
-                            )
+                            if log.count > 0:
+                                log.count = 0
+                                log.update_at = pendulum.now()
+                                online_ip_log_model_update_list.append(
+                                    log
+                                )
 
             # 节点流量记录
             node.increase_used_traffic(node_id, node_total_traffic)
