@@ -297,7 +297,8 @@ class UpdateTrafficView(View):
                 continue
 
             trafficlog_model_list = []
-            online_ip_log_model_list = []
+            online_ip_log_model_create_list = []
+            online_ip_log_model_update_list = []
             user_model_list = []
             log_time = pendulum.now()
             node_total_traffic = 0
@@ -334,12 +335,35 @@ class UpdateTrafficView(View):
                 # online ip log
                 ips = dict()
                 if traffic.get("ips", None) is not None:
-                    for ip in traffic.get("ips", []):
-                        ip = ip.split(':')[1]
-                        if ip not in ips and not UserOnLineIpLog.exist_ip_today(user.id, node_id, ip):
-                            ips[ip] = True
-                            online_ip_log_model_list.append(
-                                UserOnLineIpLog(user_id=user.id, node_id=node_id, ip=ip)
+                    all_sess = traffic.get("ips", [])
+                    if len(all_sess) > 0:
+                        ip_count = dict()
+                        for ip in all_sess:
+                            ip = ip.split(':')[1]
+                            if ip not in ip_count:
+                                ip_count[ip] = 0
+                            ip_count[ip] += 1
+
+                        for ip in ip_count:
+                            log = UserOnLineIpLog.ip_today(user.id, node_id, ip)
+                            if log is None:
+                                ips[ip] = True
+                                online_ip_log_model_create_list.append(
+                                    UserOnLineIpLog(user_id=user.id, node_id=node_id, ip=ip, count=ip_count[ip])
+                                )
+                            else:
+                                log.count = ip_count[ip]
+                                log.update_at = pendulum.now()
+                                online_ip_log_model_update_list.append(
+                                    log
+                                )
+                    else:
+                        logs = UserOnLineIpLog.ip_today(user.id, node_id, None)
+                        for log in logs:
+                            log.count = 0
+                            log.update_at = pendulum.now()
+                            online_ip_log_model_update_list.append(
+                                log
                             )
 
             # 节点流量记录
@@ -358,7 +382,8 @@ class UpdateTrafficView(View):
             # 流量记录
             UserTrafficLog.objects.bulk_create(trafficlog_model_list)
             # 在线IP
-            UserOnLineIpLog.objects.bulk_create(online_ip_log_model_list)
+            UserOnLineIpLog.objects.bulk_create(online_ip_log_model_create_list)
+            UserOnLineIpLog.objects.bulk_update(online_ip_log_model_update_list, ["count", "update_at"],)
         return JsonResponse(data={}, safe=False)
 
 

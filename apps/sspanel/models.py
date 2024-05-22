@@ -530,6 +530,8 @@ class UserOnLineIpLog(models.Model, UserPropertyMixin):
     node_id = models.IntegerField()
     ip = models.CharField(max_length=128)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    update_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    count = models.IntegerField()
 
     class Meta:
         verbose_name_plural = "用户在线IP"
@@ -551,21 +553,29 @@ class UserOnLineIpLog(models.Model, UserPropertyMixin):
         return ret
 
     @classmethod
-    def exist_ip_today(cls, user_id, node_id, ip):
+    def ip_today(cls, user_id, node_id, ip):
         now = pendulum.now()
         #start_of_today = now.start_of('day')
         #end_of_today = start_of_today.add(days=1).subtract(seconds=1)
         twenty_four_hours_ago = now.subtract(hours=24)
-        resutl = cls.objects.filter(
+        if ip is not None:
+            resutl = cls.objects.filter(
+                    user_id=user_id,
+                    node_id=node_id,
+                    ip=ip,
+                    created_at__range=[twenty_four_hours_ago, now],
+            )
+
+            if len(resutl) > 0:
+                return resutl[0]
+            return None
+        else:
+            resutl = cls.objects.filter(
                 user_id=user_id,
                 node_id=node_id,
-                ip=ip,
                 created_at__range=[twenty_four_hours_ago, now],
-        )
-
-        if len(resutl) > 0:
-            return True
-        return False
+            )
+            return resutl
 
     @classmethod
     def recent_ip(cls, user_id, hours=24):
