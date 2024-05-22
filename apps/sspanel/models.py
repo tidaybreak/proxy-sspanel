@@ -246,6 +246,11 @@ class User(AbstractUser):
         return traffic_format(self.total_traffic)
 
     @property
+    def recent_ip(self):
+        ips = UserOnLineIpLog.recent_ip(self.id)
+        return str(len(ips)) + ' ' + ','.join(ips)
+
+    @property
     def human_used_traffic(self):
         return traffic_format(self.used_traffic)
 
@@ -543,6 +548,41 @@ class UserOnLineIpLog(models.Model, UserPropertyMixin):
             if log.ip not in ip_set:
                 ret.append(log)
             ip_set.add(log.ip)
+        return ret
+
+    @classmethod
+    def exist_ip_today(cls, user_id, node_id, ip):
+        now = pendulum.now()
+        #start_of_today = now.start_of('day')
+        #end_of_today = start_of_today.add(days=1).subtract(seconds=1)
+        twenty_four_hours_ago = now.subtract(hours=24)
+        resutl = cls.objects.filter(
+                user_id=user_id,
+                node_id=node_id,
+                ip=ip,
+                created_at__range=[twenty_four_hours_ago, now],
+        )
+
+        if len(resutl) > 0:
+            return True
+        return False
+
+    @classmethod
+    def recent_ip(cls, user_id, hours=24):
+        now = pendulum.now()
+        #start_of_today = now.start_of('day')
+        #end_of_today = start_of_today.add(days=1).subtract(seconds=1)
+        twenty_four_hours_ago = now.subtract(hours=hours)
+        resutl = cls.objects.filter(
+            user_id=user_id,
+            created_at__range=[twenty_four_hours_ago, now],
+        )
+        ret = []
+        for log in cls.objects.filter(
+                user_id=user_id,
+                created_at__range=[twenty_four_hours_ago, now],
+        ):
+            ret.append(log.ip)
         return ret
 
     @classmethod

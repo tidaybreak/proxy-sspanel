@@ -332,11 +332,15 @@ class UpdateTrafficView(View):
                 # active_tcp_connections
                 active_tcp_connections += traffic["tcn"]
                 # online ip log
+                ips = dict()
                 if traffic.get("ips", None) is not None:
                     for ip in traffic.get("ips", []):
-                        online_ip_log_model_list.append(
-                            UserOnLineIpLog(user_id=user.id, node_id=node_id, ip=ip)
-                        )
+                        ip = ip.split(':')[1]
+                        if ip not in ips and not UserOnLineIpLog.exist_ip_today(user.id, node_id, ip):
+                            ips[ip] = True
+                            online_ip_log_model_list.append(
+                                UserOnLineIpLog(user_id=user.id, node_id=node_id, ip=ip)
+                            )
 
             # 节点流量记录
             node.increase_used_traffic(node_id, node_total_traffic)

@@ -62,6 +62,7 @@
                         <th>邮箱:</th>
                         <th>SS端口:</th>
                         <th>已用/总流量</th>
+                        <th>最近IP信息</th>
                     </tr>
                 </thead>
                 {% for contact in contacts %}
@@ -81,6 +82,7 @@
                     <td>{{ contact.human_used_traffic }} /
                         {{ contact.human_total_traffic }}
                     </td>
+                    <td>{{ contact.recent_ip }}</td>
                 </tr>
                 <div class="modal user_delete" id="modal-{{ contact.pk }}">
                     <div class="modal-background"></div>
