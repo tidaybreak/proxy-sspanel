@@ -596,7 +596,8 @@ class UserOnLineIpLog(models.Model, UserPropertyMixin):
                 created_at__range=[twenty_four_hours_ago, now],
         ):
             sess_count += log.count
-            ret.append(log.ip)
+            if log.ip not in ret:
+                ret.append(log.ip)
         return (sess_count, ret)
 
     @classmethod
