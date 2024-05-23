@@ -23,7 +23,8 @@
                     <th>名字</th>
                     <th>地址</th>
                     <th>等级</th>
-                    <th>上线</th>
+                    <th>启用</th>
+                    <th>在线</th>
                     <th>人/连接</th>
                     <th>已用/总流量</th>
                     <th>限速</th>
@@ -47,6 +48,7 @@
                 <td>{{ node.server }}</td>
                 <td>{{ node.level }}</td>
                 <td>{{ node.enable }}</td>
+                <td>{{ node.online }}</td>
                 <td>{{ node.online_user_count }}/{{ node.active_tcp_connections }}</td>
                 <td>{{ node.human_used_traffic}}/{{ node.human_total_traffic }}</td>
                 <td>{{ node.human_speed_limit }}</td>

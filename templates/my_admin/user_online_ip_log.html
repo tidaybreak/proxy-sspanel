@@ -47,7 +47,9 @@
                     <th>节点ID</th>
                     <th>用户ID</th>
                     <th>IP地址</th>
-                    <th>时间</th>
+                    <th>端口数量</th>
+                    <th>create时间</th>
+                    <th>update时间</th>
                 </tr>
             </thead>
             {% for contact in contacts %}
@@ -55,7 +57,9 @@
                 <td>{{ contact.node_id }}</td>
                 <td>{{ contact.user_id }}</td>
                 <td>{{ contact.ip }}</td>
+                <td>{{ contact.count }}</td>
                 <td>{{ contact.created_at }}</td>
+                <td>{{ contact.update_at }}</td>
             </tr>
             {% empty %}
             <p class="subtitle">没有用户在线哟</p>

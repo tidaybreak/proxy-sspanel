@@ -26,6 +26,7 @@ from apps.constants import (
     COUNTRIES_CHOICES,
     METHOD_CHOICES,
     NODE_TIME_OUT,
+    IP_TIME_OUT,
     THEME_CHOICES,
 )
 from apps.ext import cache, encoder, pay
@@ -248,7 +249,8 @@ class User(AbstractUser):
     @property
     def recent_ip(self):
         ips = UserOnLineIpLog.recent_ip(self.id)
-        return str(len(ips)) + ' ' + ','.join(ips)
+        info = "Sess:%d  IP数量:%d  IP:%s" % (ips[0], len(ips[1]), ','.join(ips[1]))
+        return info
 
     @property
     def human_used_traffic(self):
@@ -545,7 +547,7 @@ class UserOnLineIpLog(models.Model, UserPropertyMixin):
         ret = []
         for log in cls.objects.filter(
             node_id=node_id,
-            created_at__range=[now.subtract(seconds=NODE_TIME_OUT), now],
+            created_at__range=[now.subtract(seconds=IP_TIME_OUT), now],
         ):
             #if log.ip not in ip_set:
             ret.append(log)
@@ -557,7 +559,7 @@ class UserOnLineIpLog(models.Model, UserPropertyMixin):
         now = pendulum.now()
         #start_of_today = now.start_of('day')
         #end_of_today = start_of_today.add(days=1).subtract(seconds=1)
-        twenty_four_hours_ago = now.subtract(hours=24)
+        twenty_four_hours_ago = now.subtract(seconds=IP_TIME_OUT)
         if ip is not None:
             resutl = cls.objects.filter(
                     user_id=user_id,
@@ -578,23 +580,24 @@ class UserOnLineIpLog(models.Model, UserPropertyMixin):
             return resutl
 
     @classmethod
-    def recent_ip(cls, user_id, hours=24):
+    def recent_ip(cls, user_id, seconds=IP_TIME_OUT):
         now = pendulum.now()
         #start_of_today = now.start_of('day')
         #end_of_today = start_of_today.add(days=1).subtract(seconds=1)
-        twenty_four_hours_ago = now.subtract(hours=hours)
-        resutl = cls.objects.filter(
-            user_id=user_id,
-            created_at__range=[twenty_four_hours_ago, now],
-        )
+        twenty_four_hours_ago = now.subtract(seconds=seconds)
+        # resutl = cls.objects.filter(
+        #     user_id=user_id,
+        #     created_at__range=[twenty_four_hours_ago, now],
+        # )
         ret = []
+        sess_count = 0
         for log in cls.objects.filter(
                 user_id=user_id,
                 created_at__range=[twenty_four_hours_ago, now],
         ):
-            if log.ip not in ret:
-                ret.append(log.ip)
-        return ret
+            sess_count += log.count
+            ret.append(log.ip)
+        return (sess_count, ret)
 
     @classmethod
     def truncate(cls):
@@ -850,6 +853,12 @@ class BaseAbstractNode(models.Model):
     @functional.cached_property
     def online_info(self):
         return NodeOnlineLog.get_latest_online_log_info(self.node_type, self.node_id)
+
+    @property
+    def online(self):
+        if self.online_info["online"]:
+            return '在线'
+        return '离线'
 
     @property
     def online_user_count(self):
