@@ -14,6 +14,7 @@ docker run -d \
 proxy-sspanel:v1 \
 /bin/sh /data/ofidc/docker-volume/proxy-sspanel/run.sh
 
+apk add --no-cache tzdata
 
 
 

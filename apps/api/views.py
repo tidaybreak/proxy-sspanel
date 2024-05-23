@@ -353,7 +353,7 @@ class UpdateTrafficView(View):
                                 )
                             else:
                                 log.count = ip_count[ip]
-                                log.update_at = pendulum.now()
+                                log.update_at = pendulum.datetime()
                                 online_ip_log_model_update_list.append(
                                     log
                                 )
